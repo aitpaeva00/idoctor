@@ -1,27 +1,22 @@
 package com.aitpaeva.idoctor.controller;
 
-import com.aitpaeva.idoctor.model.Doctor;
 import com.aitpaeva.idoctor.service.DoctorService;
-import org.springframework.web.bind.annotation.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.util.List;
-
-@RestController
-@RequestMapping("/api/doctors")
+@Controller
+@RequestMapping("/doctors")
+@RequiredArgsConstructor
 public class DoctorController {
+
     private final DoctorService doctorService;
 
-    public DoctorController(DoctorService doctorService) {
-        this.doctorService = doctorService;
-    }
-
     @GetMapping
-    public List<Doctor> getAllDoctors() {
-        return doctorService.getAllDoctors();
-    }
-
-    @GetMapping("/specialization/{specialization}")
-    public List<Doctor> getDoctorsBySpecialization(@PathVariable String specialization) {
-        return doctorService.getDoctorsBySpecialization(specialization);
+    public String showDoctors(Model model) {
+        model.addAttribute("doctors", doctorService.getAllDoctors());
+        return "doctors"; // Refers to doctors.html in templates folder
     }
 }
