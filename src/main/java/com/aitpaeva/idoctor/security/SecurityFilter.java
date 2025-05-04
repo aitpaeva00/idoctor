@@ -1,5 +1,6 @@
 package com.aitpaeva.idoctor.security;
 
+import com.aitpaeva.idoctor.service.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,15 +9,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 public class SecurityFilter extends OncePerRequestFilter {
-    private final JwtUtil jwtUtil;
+    private final TokenService tokenService;
 
-    public SecurityFilter(JwtUtil jwtUtil) {
-        this.jwtUtil = jwtUtil;
+    public SecurityFilter(TokenService tokenService) {
+        this.tokenService = tokenService;
     }
 
     @Override
@@ -25,7 +25,7 @@ public class SecurityFilter extends OncePerRequestFilter {
         String token = request.getHeader("Authorization");
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
-            String username = jwtUtil.extractUsername(token);
+            String username = tokenService.extractUsername(token);
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = User.withUsername(username).password("").authorities("USER").build();

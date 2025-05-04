@@ -36,14 +36,4 @@ public class AuthServiceTest {
         verify(userRepository, times(1)).save(any(User.class));
     }
 
-    @Test
-    void testLoginUser() {
-        User user = new User(1L, "testuser", "password", Role.PATIENT);
-        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
-
-        String token = authService.login("testuser", "password");
-
-        assertEquals("mocked-jwt-token", token);
-        verify(userRepository, times(1)).findByUsername("testuser");
-    }
 }

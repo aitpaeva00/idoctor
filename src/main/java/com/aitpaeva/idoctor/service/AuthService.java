@@ -1,35 +1,54 @@
 package com.aitpaeva.idoctor.service;
 
+import com.aitpaeva.idoctor.exceptions.UserAlreadyExistsException;
+import com.aitpaeva.idoctor.model.RefreshToken;
 import com.aitpaeva.idoctor.model.User;
 import com.aitpaeva.idoctor.repository.UserRepository;
-import com.aitpaeva.idoctor.security.JwtUtil;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 import java.util.Optional;
 
 @Service
 public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
+    private final TokenService tokenService;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, TokenService tokenService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.jwtUtil = jwtUtil;
+        this.tokenService = tokenService;
     }
 
     public String register(User user) {
+
+        if (userRepository.existsByUsername(user.getUsername())) {
+            throw new UserAlreadyExistsException("Username already exists");
+        }
+
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
         return "User registered successfully!";
     }
 
-    public String login(String username, String password) {
-        Optional<User> user = userRepository.findByUsername(username);
-        if (user.isPresent() && passwordEncoder.matches(password, user.get().getPassword())) {
-            return jwtUtil.generateToken(username);
+    public Map<String, String> login(String username, String password) {
+        Optional<User> userOptional = userRepository.findByUsername(username);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            if (passwordEncoder.matches(password, user.getPassword())) {
+                String accessToken = tokenService.generateAccessToken(user); // short-lived token
+                RefreshToken refreshToken = tokenService.createRefreshToken(user); // long-lived token
+
+                return Map.of(
+                        "accessToken", accessToken,
+                        "refreshToken", refreshToken.getToken()
+                );
+            }
         }
-        return "Invalid credentials!";
+        throw new BadCredentialsException("Invalid credentials!");
     }
+
 }
