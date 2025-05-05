@@ -3,6 +3,7 @@ package com.aitpaeva.idoctor.service;
 import com.aitpaeva.idoctor.exceptions.UserAlreadyExistsException;
 import com.aitpaeva.idoctor.model.RefreshToken;
 import com.aitpaeva.idoctor.model.User;
+import com.aitpaeva.idoctor.repository.RefreshTokenRepository;
 import com.aitpaeva.idoctor.repository.UserRepository;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,11 +17,13 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
+    private final RefreshTokenRepository refreshTokenRepository;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, TokenService tokenService) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, TokenService tokenService, RefreshTokenRepository refreshTokenRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenService = tokenService;
+        this.refreshTokenRepository = refreshTokenRepository;
     }
 
     public String register(User user) {
@@ -50,5 +53,28 @@ public class AuthService {
         }
         throw new BadCredentialsException("Invalid credentials!");
     }
+
+    public void deleteUser(String username, String password) {
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        if (optionalUser.isEmpty()) {
+            throw new RuntimeException("User not found");
+        }
+
+        User user = optionalUser.get();
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new RuntimeException("Invalid credentials");
+        }
+
+        // Удалить refresh token, если есть
+        RefreshToken token = refreshTokenRepository.findByUser(user);
+        if (token != null) {
+            refreshTokenRepository.delete(token);
+        }
+
+        userRepository.delete(user);
+    }
+
+
 
 }

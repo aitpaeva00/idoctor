@@ -36,6 +36,16 @@ public class AuthController {
         } catch (BadCredentialsException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "Invalid username or password"));
-        }    }
+        }
+    }
+
+    @PostMapping("/delete")
+    public ResponseEntity<String> deleteUser(@RequestBody Map<String, String> request) {
+        String username = request.get("username");
+        String password = request.get("password");
+
+        authService.deleteUser(username, password);
+        return ResponseEntity.ok("User deleted successfully.");
+    }
 
 }
