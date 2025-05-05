@@ -27,7 +27,7 @@ public class AuthServiceTest {
 
     @Test
     void testRegisterUser() {
-        User user = new User(1L, "testuser", "password", Role.PATIENT);
+        User user = new User(1L, "testuser", "test@sample.com", "password", Role.PATIENT);
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         String result = authService.register(user);
