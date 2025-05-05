@@ -5,9 +5,11 @@ import com.aitpaeva.idoctor.model.RefreshToken;
 import com.aitpaeva.idoctor.model.User;
 import com.aitpaeva.idoctor.repository.RefreshTokenRepository;
 import com.aitpaeva.idoctor.repository.UserRepository;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.util.Map;
 import java.util.Optional;
@@ -73,6 +75,13 @@ public class AuthService {
         }
 
         userRepository.delete(user);
+    }
+
+    @DeleteMapping("/delete-test-user")
+    public ResponseEntity<String> deleteTestUser() {
+        Optional<User> user = userRepository.findByEmail("aitpaevaaizhan@gmail.com");
+        user.ifPresent(userRepository::delete);
+        return ResponseEntity.ok("Test user deleted.");
     }
 
 

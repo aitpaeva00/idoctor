@@ -13,6 +13,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+
+import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
@@ -59,10 +62,25 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
-                        .defaultSuccessUrl("/oauth2/success", true)
+                        .defaultSuccessUrl("/oauth2/success", false)
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout") // URL to trigger logout
+                        .logoutSuccessUrl("/login?logout") // Redirect after logout
+                        .clearAuthentication(true) // Clear authentication information
+                        .invalidateHttpSession(true) // Invalidate HTTP session
+                        .addLogoutHandler(new SecurityContextLogoutHandler()) // Custom logout handler
+                        .addLogoutHandler((request, response, authentication) -> {
+                            // Redirect to Google logout to ensure the user is logged out from Google
+                            try {
+                                response.sendRedirect("https://accounts.google.com/Logout");
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        })
                 )
 //                .addFilterBefore(securityFilter(), UsernamePasswordAuthenticationFilter.class)
                 .build();
