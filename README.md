@@ -153,3 +153,89 @@ Logs the user out from the session and optionally from Google.
 - Notifications and Reminders
 
 ---
+
+
+---
+
+## 🧪 How to Test iDoctor API Using Postman
+
+### 🔸 1. Register a New User
+
+- **Method**: POST
+- **URL**: `http://localhost:8080/api/auth/register`
+- **Headers**:  
+  `Content-Type: application/json`
+- **Body**:
+```json
+{
+  "email": "testuser@example.com",
+  "password": "testpassword"
+}
+```
+- **Expected Response**:
+```json
+  User registered successfully
+```
+
+---
+
+### 🔸 2. Login with Registered User
+
+- **Method**: POST
+- **URL**: `http://localhost:8080/api/auth/login`
+- **Headers**:  
+  `Content-Type: application/json`
+- **Body**:
+```json
+{
+  "email": "testuser@example.com",
+  "password": "testpassword"
+}
+```
+- **Expected Response**:
+```json
+{
+  "accessToken": "access-token",
+  "refreshToken": "refresh-token"
+}
+```
+
+---
+
+### 🔸 3. Refresh Access Token
+
+- **Method**: POST
+- **URL**: `http://localhost:8080/api/auth/refresh`
+- **Headers**:  
+  `Content-Type: application/json`
+- **Body**:
+```json
+{
+  "refreshToken": "your-refresh-token"
+}
+```
+- **Expected Response**:
+```json
+{
+  "accessToken": "new-access-token",
+  "refreshToken": "new-refresh-token"
+}
+```
+
+---
+
+### 🔸 4. OAuth2 Login with Google
+
+- **Method**: GET
+- **URL**: `http://localhost:8080/oauth2/authorization/google`
+- Follow the redirect to Google login page. Upon success, you'll be redirected to `/oauth2/success`.
+
+---
+
+### 🔸 5. Logout
+
+- **Method**: POST
+- **URL**: `http://localhost:8080/logout`
+- **Expected Behavior**: Logs the user out and redirects to `/login?logout` or logs out of Google.
+
+---
